@@ -331,15 +331,14 @@ const runResizeCode = async (
     },
   });
 
-  runButton.addEventListener("click", async (e) => {
-    e.preventDefault();
+  runButton.addEventListener("click", (e) => {
     const RESIZE_THRESHOLD = Number(resizeThresholdInput.value);
     const NEW_SIZE_FACTOR = Number(resizeFactorInput.value);
     const INITIAL_CAPACITY = Number(initialSizeInput.value);
     const OPS_PER_BATCH = Number(opsPerBatchInput.value);
     const ITERATIONS = Number(batchesInput.value);
     const KEY_RANGE = Number(keyRangeInput.value);
-    await benchmark(
+    benchmark(
       device,
       hashTablePipeline,
       hashTableBindGroupLayout,
