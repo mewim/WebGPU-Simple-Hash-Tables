@@ -237,6 +237,7 @@ const runResizeCode = async (
   if (!navigator.gpu) {
     resultsTextArea.value +=
       "WebGPU is not supported. Enable chrome://flags/#enable-unsafe-webgpu flag.\n";
+      runButton.disabled = true;
     return;
   }
 
