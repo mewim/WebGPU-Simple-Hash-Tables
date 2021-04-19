@@ -141,7 +141,7 @@ const createAllocatorBuffer = (device, blockSize, slabSize) => {
   const allocaterMetadataBuffer = device.createBuffer({
     mappedAtCreation: true,
     size: allocaterMetadataSize * Int32Array.BYTES_PER_ELEMENT,
-    usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC,
+    usage: GPUBufferUsage.STORAGE,
   });
 
   const mappedAllocaterMetadataBuffer = allocaterMetadataBuffer.getMappedRange();
@@ -158,17 +158,17 @@ const createBuffersForHashTable = (
 ) => {
   let deallocatedListBuffer = device.createBuffer({
     size: (blockSize / slabSize) * Int32Array.BYTES_PER_ELEMENT,
-    usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC,
+    usage: GPUBufferUsage.STORAGE,
   });
 
   let blocksBuffer = device.createBuffer({
     size: blockSize * Int32Array.BYTES_PER_ELEMENT,
-    usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC,
+    usage: GPUBufferUsage.STORAGE,
   });
 
   let hashTableBuffer = device.createBuffer({
     size: hashTableLength * Int32Array.BYTES_PER_ELEMENT,
-    usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC,
+    usage: GPUBufferUsage.STORAGE,
   });
 
   let allocaterMetadataBuffer = createAllocatorBuffer(
@@ -295,9 +295,9 @@ const runResizeCode = async (
   newCapacity
 ) => {
   // Make sure the length of hash table changes with capacity
-  const newHashTableLength =
-    Math.ceil(newCapacity / oldCapacity * oldHashTableLength);
-  console.log(newHashTableLength);
+  const newHashTableLength = Math.ceil(
+    (newCapacity / oldCapacity) * oldHashTableLength
+  );
 
   const newBlockSize = computeBlockSize(
     newCapacity,
@@ -493,7 +493,9 @@ const runResizeCode = async (
   const resizeShaderModule = device.createShaderModule({
     code: resizeShaderCode,
   });
-  const resizeBindGroupLayout = device.createBindGroupLayout(bindGroupLayout);
+  const resizeBindGroupLayout = device.createBindGroupLayout(
+    JSON.parse(JSON.stringify(bindGroupLayout))
+  );
 
   const resizePipeline = device.createComputePipeline({
     layout: device.createPipelineLayout({
@@ -549,4 +551,25 @@ const readGPUBuffer = async (device, gpuBuffer, bufferSize) => {
   await gpuReadBuffer.mapAsync(GPUMapMode.READ);
   const arrayBuffer = gpuReadBuffer.getMappedRange();
   return new Int32Array(arrayBuffer);
+};
+
+const printBlocksBuffer = async (device, blocksBuffer, blockSize, slabSize) => {
+  const blocks = await readGPUBuffer(
+    device,
+    blocksBuffer,
+    blockSize * Int32Array.BYTES_PER_ELEMENT
+  );
+  console.log("Blocks:", blocks);
+  const keys = [];
+  for (let i = 0; i < blocks.length; ++i) {
+    if (i % slabSize === slabSize - 1) {
+      continue;
+    }
+    if (blocks[i] === 0) {
+      continue;
+    }
+    keys.push(blocks[i]);
+  }
+  console.log("Keys:", keys);
+  console.log("Unique keys:", new Set(keys));
 };
