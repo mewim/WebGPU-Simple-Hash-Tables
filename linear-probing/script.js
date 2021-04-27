@@ -371,3 +371,21 @@ const readGPUBuffer = async (device, gpuBuffer, bufferSize) => {
   const arrayBuffer = gpuReadBuffer.getMappedRange();
   return new Int32Array(arrayBuffer);
 };
+
+const printHashtableBuffer = async (device, hashtableBuffer, hashtableBufferSize) => {
+  const blocks = await readGPUBuffer(
+    device,
+    hashtableBuffer,
+    hashtableSize * Int32Array.BYTES_PER_ELEMENT
+  );
+  console.log("Blocks:", blocks);
+  const keys = [];
+  for (let i = 0; i < blocks.length; ++i) {
+    if (blocks[i] === 0) {
+      continue;
+    }
+    keys.push(blocks[i]);
+  }
+  console.log("Keys:", keys);
+  console.log("Unique keys:", new Set(keys));
+};
