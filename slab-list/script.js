@@ -128,7 +128,9 @@ const benchmark = async (
     } keys inserted,\t${counters[1]} keys deleted,\tthroughput ${(
       OPS_PER_BATCH /
       (time / 1000)
-    ).toFixed(0)} ops/s.\n`;
+    ).toFixed(0)} ops/s,\t current load factor is: ${(
+      totalInsertions / currentCapacity
+    ).toFixed(2)}\n`;
   }
 };
 

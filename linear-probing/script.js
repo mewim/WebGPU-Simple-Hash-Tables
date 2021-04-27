@@ -82,7 +82,13 @@ const benchmark = async (
     } keys inserted,\t${counters[1]} keys deleted,\tthroughput ${(
       OPS_PER_BATCH /
       (time / 1000)
-    ).toFixed(0)} ops/s.\n`;
+    ).toFixed(0)} ops/s,\t current load factor is: ${(
+      totalInsertions / currentCapacity
+    ).toFixed(2)}\n`;
+    console.log(
+      totalInsertions / currentCapacity,
+      OPS_PER_BATCH / (time / 1000)
+    );
   }
 };
 
@@ -237,7 +243,7 @@ const runResizeCode = async (
   if (!navigator.gpu) {
     resultsTextArea.value +=
       "WebGPU is not supported. Enable chrome://flags/#enable-unsafe-webgpu flag.\n";
-      runButton.disabled = true;
+    runButton.disabled = true;
     return;
   }
 
@@ -372,7 +378,11 @@ const readGPUBuffer = async (device, gpuBuffer, bufferSize) => {
   return new Int32Array(arrayBuffer);
 };
 
-const printHashtableBuffer = async (device, hashtableBuffer, hashtableBufferSize) => {
+const printHashtableBuffer = async (
+  device,
+  hashtableBuffer,
+  hashtableBufferSize
+) => {
   const blocks = await readGPUBuffer(
     device,
     hashtableBuffer,
